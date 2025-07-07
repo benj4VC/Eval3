@@ -1,46 +1,28 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Persona } from './Interfaces/IPersona'
 
 interface Props {
   saludo: string
+  personas: Persona[]
   traerPersona: (p: Persona) => void
+  eliminarPersona: (index: number) => void
 }
 
-const MostrarPersonas = ({ saludo, traerPersona }: Props) => {
-  const [personas, setPersonas] = useState<Persona[]>([])
-
-  // Cargar al iniciar
-  useEffect(() => {
-    const listadoStr = localStorage.getItem('personas')
-    if (listadoStr) {
-      setPersonas(JSON.parse(listadoStr))
-    }
-  }, [])
-
-  // Eliminar directo
-  const handleEliminar = (index: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta persona?')) return
-
-    const nuevasPersonas = personas.filter((_, i) => i !== index)
-    setPersonas(nuevasPersonas)
-    localStorage.setItem('personas', JSON.stringify(nuevasPersonas))
-  }
-
-  // Editar directo
-  const handleEditar = (index: number) => {
-    traerPersona(personas[index])
-  }
-
+const MostrarPersonas = ({ saludo, personas, traerPersona, eliminarPersona }: Props) => {
   return (
     <>
       <h1>{saludo}</h1>
-      <table border={1}>
+      <table border={1} cellPadding={5} cellSpacing={0}>
         <thead>
           <tr>
             <th>Nombre</th>
             <th>Apellido</th>
-            <th>Acción</th>
+            <th>Edad</th>
+            <th>Categoría</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -48,9 +30,13 @@ const MostrarPersonas = ({ saludo, traerPersona }: Props) => {
             <tr key={index}>
               <td>{p.nombre}</td>
               <td>{p.apellido}</td>
+              <td>{p.edad}</td>
+              <td>{p.categoria}</td>
+              <td>{p.descripcion}</td>
+              <td>{p.fecha}</td>
               <td>
-                <button onClick={() => handleEditar(index)}>Editar</button>{' '}
-                <button onClick={() => handleEliminar(index)}>Eliminar</button>
+                <button onClick={() => traerPersona(p)}>Editar</button>{' '}
+                <button onClick={() => eliminarPersona(index)}>Eliminar</button>
               </td>
             </tr>
           ))}
