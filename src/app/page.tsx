@@ -65,9 +65,7 @@ export default function Home() {
 
   const traerPersona = (p: Persona) => {
     const index = personas.findIndex(
-      item =>
-        item.nombre === p.nombre &&
-        item.apellido === p.apellido
+      item => item.nombre === p.nombre && item.apellido === p.apellido
     )
     if (index !== -1) {
       setPersona(p)
@@ -76,34 +74,26 @@ export default function Home() {
     }
   }
 
+  const eliminarPersona = (index: number) => {
+    if (!confirm('¿Seguro quieres eliminar?')) return
+
+    const nuevasPersonas = personas.filter((_, i) => i !== index)
+    setPersonas(nuevasPersonas)
+  }
+
   return (
     <main>
-      <h1>Formulario de registro</h1>
+      <h1>Registro de Personas</h1>
       <form onSubmit={handleRegistrar}>
         <label>Nombre</label><br />
-        <input
-          name="nombre"
-          type="text"
-          value={persona.nombre}
-          onChange={handleChange}
-        /><br />
+        <input name="nombre" type="text" value={persona.nombre} onChange={handleChange} /><br />
         <span>{errorNombre}</span><br />
 
         <label>Apellido</label><br />
-        <input
-          name="apellido"
-          type="text"
-          value={persona.apellido}
-          onChange={handleChange}
-        /><br />
+        <input name="apellido" type="text" value={persona.apellido} onChange={handleChange} /><br />
 
         <label>Edad</label><br />
-        <input
-          name="edad"
-          type="number"
-          value={persona.edad}
-          onChange={handleChange}
-        /><br />
+        <input name="edad" type="number" value={persona.edad} onChange={handleChange} /><br />
 
         <label>Categoría</label><br />
         <select name="categoria" value={persona.categoria} onChange={handleChange}>
@@ -113,26 +103,20 @@ export default function Home() {
         </select><br />
 
         <label>Descripción</label><br />
-        <textarea
-          name="descripcion"
-          value={persona.descripcion}
-          onChange={handleChange}
-        ></textarea><br />
+        <textarea name="descripcion" value={persona.descripcion} onChange={handleChange}></textarea><br />
 
         <label>Fecha</label><br />
-        <input
-          name="fecha"
-          type="date"
-          value={persona.fecha}
-          onChange={handleChange}
-        /><br /><br />
+        <input name="fecha" type="date" value={persona.fecha} onChange={handleChange} /><br /><br />
 
-        <button type="submit">
-          {modoEditar ? 'Actualizar' : 'Registrar'}
-        </button>
+        <button type="submit">{modoEditar ? 'Actualizar' : 'Registrar'}</button>
       </form>
 
-      <MostrarPersonas saludo="Listado de Personas" traerPersona={traerPersona} />
+      <MostrarPersonas
+        saludo="Personas Registradas"
+        personas={personas}
+        traerPersona={traerPersona}
+        eliminarPersona={eliminarPersona}
+      />
     </main>
   )
 }
