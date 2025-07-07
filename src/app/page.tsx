@@ -7,7 +7,7 @@ import MostrarPersonas from './MostrarPersonas'
 const initialState: Persona = {
   nombre: '',
   apellido: '',
-  edad: 0,
+  edad: '',
   categoria: 'Evento',
   descripcion: '',
   fecha: ''
