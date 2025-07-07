@@ -1,15 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
-type Persona = {
-  nombre: string
-  apellido: string
-  edad: number
-  categoria: string
-  descripcion: string
-  fecha: string
-}
+import { Persona } from './Interfaces/IPersona'
+import MostrarPersonas from './MostrarPersonas'
 
 const initialState: Persona = {
   nombre: '',
@@ -24,6 +17,8 @@ export default function Home() {
   const [persona, setPersona] = useState<Persona>(initialState)
   const [personas, setPersonas] = useState<Persona[]>([])
   const [errorNombre, setErrorNombre] = useState('')
+  const [modoEditar, setModoEditar] = useState(false)
+  const [indiceEditar, setIndiceEditar] = useState<number | null>(null)
 
   useEffect(() => {
     const data = localStorage.getItem('personas')
@@ -36,39 +31,59 @@ export default function Home() {
     localStorage.setItem('personas', JSON.stringify(personas))
   }, [personas])
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setPersona({ ...persona, [name]: name === 'edad' ? Number(value) : value })
+    setPersona({
+      ...persona,
+      [name]: name === 'edad' ? Number(value) : value
+    })
 
-    if (name === 'nombre' && value.length < 3) {
-      setErrorNombre('El nombre debe tener al menos 3 caracteres')
-    } else if (name === 'nombre') {
-      setErrorNombre('')
+    if (name === 'nombre') {
+      setErrorNombre(value.length < 3 ? 'Debe tener al menos 3 caracteres' : '')
     }
   }
 
   const handleRegistrar = (e: React.FormEvent) => {
     e.preventDefault()
     if (persona.nombre.trim().length < 3) {
-      setErrorNombre('El nombre debe tener al menos 3 caracteres')
+      setErrorNombre('Debe tener al menos 3 caracteres')
       return
     }
 
-    setPersonas([...personas, persona])
+    if (modoEditar && indiceEditar !== null) {
+      const nuevasPersonas = [...personas]
+      nuevasPersonas[indiceEditar] = persona
+      setPersonas(nuevasPersonas)
+      setModoEditar(false)
+      setIndiceEditar(null)
+    } else {
+      setPersonas([...personas, persona])
+    }
+
     setPersona(initialState)
+  }
+
+  const traerPersona = (p: Persona) => {
+    const index = personas.findIndex(
+      item =>
+        item.nombre === p.nombre &&
+        item.apellido === p.apellido
+    )
+    if (index !== -1) {
+      setPersona(p)
+      setModoEditar(true)
+      setIndiceEditar(index)
+    }
   }
 
   return (
     <main>
-      <h1>FORMULARIO DE REGISTRO DE PERSONAS</h1>
+      <h1>Formulario de registro</h1>
       <form onSubmit={handleRegistrar}>
         <label>Nombre</label><br />
         <input
-          type="text"
           name="nombre"
-          placeholder="ingrese su nombre"
+          type="text"
           value={persona.nombre}
           onChange={handleChange}
         /><br />
@@ -76,27 +91,22 @@ export default function Home() {
 
         <label>Apellido</label><br />
         <input
-          type="text"
           name="apellido"
-          placeholder="ingrese su apellido"
+          type="text"
           value={persona.apellido}
           onChange={handleChange}
         /><br />
 
         <label>Edad</label><br />
         <input
-          type="number"
           name="edad"
+          type="number"
           value={persona.edad}
           onChange={handleChange}
         /><br />
 
         <label>Categoría</label><br />
-        <select
-          name="categoria"
-          value={persona.categoria}
-          onChange={handleChange}
-        >
+        <select name="categoria" value={persona.categoria} onChange={handleChange}>
           <option value="Evento">Evento</option>
           <option value="Voluntariado">Voluntariado</option>
           <option value="Proyecto">Proyecto</option>
@@ -105,47 +115,24 @@ export default function Home() {
         <label>Descripción</label><br />
         <textarea
           name="descripcion"
-          placeholder="ingrese una breve descripcion"
           value={persona.descripcion}
           onChange={handleChange}
         ></textarea><br />
 
         <label>Fecha</label><br />
         <input
-          type="date"
           name="fecha"
+          type="date"
           value={persona.fecha}
           onChange={handleChange}
         /><br /><br />
 
-        <button type="submit">Registrar</button>
+        <button type="submit">
+          {modoEditar ? 'Actualizar' : 'Registrar'}
+        </button>
       </form>
 
-      <h2>PERSONAS REGISTRADAS</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Edad</th>
-            <th>Categoría</th>
-            <th>Descripción</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          {personas.map((p, i) => (
-            <tr key={i}>
-              <td>{p.nombre}</td>
-              <td>{p.apellido}</td>
-              <td>{p.edad}</td>
-              <td>{p.categoria}</td>
-              <td>{p.descripcion}</td>
-              <td>{p.fecha}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <MostrarPersonas saludo="Listado de Personas" traerPersona={traerPersona} />
     </main>
   )
 }
