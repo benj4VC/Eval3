@@ -8,7 +8,6 @@ const initialState: Persona = {
   nombre: '',
   apellido: '',
   edad: '',
-  edad:'' ,
   categoria: 'Evento',
   descripcion: '',
   fecha: ''
@@ -22,14 +21,14 @@ export default function Home() {
   const [modoEditar, setModoEditar] = useState(false)
   const [indiceEditar, setIndiceEditar] = useState<number | null>(null)
 
-
   useEffect(() => {
     const data = localStorage.getItem('personas')
     if (data) {
       setPersonas(JSON.parse(data))
     }
-  }, []) 
-  
+  }, [])
+
+ 
   useEffect(() => {
     localStorage.setItem('personas', JSON.stringify(personas))
   }, [personas])
@@ -63,6 +62,11 @@ export default function Home() {
 
     if (persona.apellido.trim().length < 3) {
       setErrorApellido('El apellido debe tener al menos 3 caracteres.')
+      return
+    }
+
+    if (persona.edad < 8 || persona.edad > 120) {
+      alert('La edad debe ser mayor o igual a 8 y menor o igual a 120.')
       return
     }
 
@@ -128,6 +132,8 @@ export default function Home() {
           type="number"
           value={persona.edad}
           onChange={handleChange}
+          min={8}
+          max={120}
           required
         /><br />
 
