@@ -10,7 +10,7 @@ import {
 
 import { Persona } from '../Interfaces/IPersona'
 
-// Crear
+
 export const agregarPersona = async (persona: Persona) => {
   try {
     await addDoc(collection(db, 'personas'), persona)
@@ -20,7 +20,6 @@ export const agregarPersona = async (persona: Persona) => {
   }
 }
 
-// Leer
 export const obtenerPersonas = async (): Promise<Persona[]> => {
   try {
     const querySnapshot = await getDocs(collection(db, 'personas'))
@@ -35,7 +34,7 @@ export const obtenerPersonas = async (): Promise<Persona[]> => {
   }
 }
 
-// Actualizar
+
 export const actualizarPersona = async (id: string, personaActualizada: Persona) => {
   try {
     const personaRef = doc(db, 'personas', id)
@@ -46,9 +45,12 @@ export const actualizarPersona = async (id: string, personaActualizada: Persona)
   }
 }
 
-// Eliminar
+
 export const eliminarPersona = async (id: string) => {
   try {
+    if (!id || typeof id !== 'string') {
+      throw new Error('ID inválido para eliminar')
+    }
     await deleteDoc(doc(db, 'personas', id))
     console.log('Persona eliminada correctamente')
   } catch (error) {
