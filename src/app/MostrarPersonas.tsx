@@ -6,7 +6,7 @@ interface Props {
   saludo: string
   personas: Persona[]
   traerPersona: (p: Persona) => void
-  eliminarPersona: (index: number) => void
+  eliminarPersona: (id: string) => void
 }
 
 const MostrarPersonas = ({ saludo, personas, traerPersona, eliminarPersona }: Props) => {
@@ -27,7 +27,7 @@ const MostrarPersonas = ({ saludo, personas, traerPersona, eliminarPersona }: Pr
         </thead>
         <tbody>
           {personas.map((p, index) => (
-            <tr key={index}>
+            <tr key={p.id ?? index}>
               <td>{p.nombre}</td>
               <td>{p.apellido}</td>
               <td>{p.edad}</td>
@@ -36,7 +36,7 @@ const MostrarPersonas = ({ saludo, personas, traerPersona, eliminarPersona }: Pr
               <td>{p.fecha}</td>
               <td>
                 <button onClick={() => traerPersona(p)}>Editar</button>{' '}
-                <button onClick={() => eliminarPersona(index)}>Eliminar</button>
+                <button onClick={() => eliminarPersona(p.id!)}>Eliminar</button>
               </td>
             </tr>
           ))}
