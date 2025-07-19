@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
 import { Persona } from './Interfaces/IPersona'
 import MostrarPersonas from './MostrarPersonas'
 
+import {
+  agregarPersona,
+  obtenerPersonas,
+  actualizarPersona,
+  eliminarPersona as eliminarPersonaFirebase
+} from '../firebase/firebaseCRUD'
+
 const initialState: Persona = {
   nombre: '',
   apellido: '',
@@ -20,18 +27,17 @@ export default function Home() {
   const [errorApellido, setErrorApellido] = useState('')
   const [modoEditar, setModoEditar] = useState(false)
   const [indiceEditar, setIndiceEditar] = useState<number | null>(null)
-
-  useEffect(() => {
-    const data = localStorage.getItem('personas')
-    if (data) {
-      setPersonas(JSON.parse(data))
-    }
-  }, [])
+  const [personaIdEditar, setPersonaIdEditar] = useState<string | null>(null)
 
  
   useEffect(() => {
-    localStorage.setItem('personas', JSON.stringify(personas))
-  }, [personas])
+    cargarPersonas()
+  }, [])
+
+  const cargarPersonas = async () => {
+    const data = await obtenerPersonas()
+    setPersonas(data)
+  }
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -52,7 +58,7 @@ export default function Home() {
     }
   }
 
-  const handleRegistrar = (e: React.FormEvent) => {
+  const handleRegistrar = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (persona.nombre.trim().length < 3) {
@@ -70,41 +76,39 @@ export default function Home() {
       return
     }
 
-    if (modoEditar && indiceEditar !== null) {
-      const nuevasPersonas = [...personas]
-      nuevasPersonas[indiceEditar] = persona
-      setPersonas(nuevasPersonas)
-      setModoEditar(false)
-      setIndiceEditar(null)
+    if (modoEditar && personaIdEditar) {
+      await actualizarPersona(personaIdEditar, persona)
+      console.log('Persona actualizada en Firebase')
     } else {
-      setPersonas([...personas, persona])
+      await agregarPersona(persona)
+      console.log('Persona registrada en Firebase')
     }
 
+    await cargarPersonas()
     setPersona(initialState)
     setErrorNombre('')
     setErrorApellido('')
+    setModoEditar(false)
+    setPersonaIdEditar(null)
   }
 
-  const traerPersona = (p: Persona) => {
-    const index = personas.findIndex(
-      item => item.nombre === p.nombre && item.apellido === p.apellido
-    )
-    if (index !== -1) {
-      setPersona(p)
-      setModoEditar(true)
-      setIndiceEditar(index)
-    }
+  const traerPersona = (p: Persona, index: number) => {
+    setPersona(p)
+    setModoEditar(true)
+    setIndiceEditar(index)
+    setPersonaIdEditar(p.id ?? null)
   }
 
-  const eliminarPersona = (index: number) => {
-    if (!confirm('¿Seguro quieres eliminar?')) return
-    const nuevasPersonas = personas.filter((_, i) => i !== index)
-    setPersonas(nuevasPersonas)
+  const handleEliminarPersona = async (id: string) => {
+    if (!confirm('¿Seguro que quieres eliminar esta persona?')) return
+    await eliminarPersonaFirebase(id)
+    console.log('Persona eliminada en Firebase')
+    await cargarPersonas()
   }
 
   return (
     <main>
-      <h1>Registro de Personas</h1>
+      <h1>Registro de Personas (Firebase)</h1>
       <form onSubmit={handleRegistrar}>
         <label>Nombre</label><br />
         <input
@@ -173,7 +177,7 @@ export default function Home() {
         saludo="Listado de Registros"
         personas={personas}
         traerPersona={traerPersona}
-        eliminarPersona={eliminarPersona}
+        eliminarPersona={handleEliminarPersona}
       />
     </main>
   )

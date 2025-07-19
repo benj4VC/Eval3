@@ -1,4 +1,9 @@
-export interface Persona{
-  nombre : string,
-  apellido : string
+export interface Persona {
+  id: string
+  nombre: string
+  apellido: string
+  edad: number
+  categoria: string
+  descripcion: string
+  fecha: string
 }
